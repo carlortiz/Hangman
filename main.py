@@ -2,13 +2,11 @@ import pygame
 import random
 import os
 
-# make window
 pygame.init()
 WIDTH, HEIGHT = 1100, 750
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Hangman")
 
-# make images
 images = []
 for i in range(7):
     image_name = 'hangman' + str(i) + '.png'
@@ -16,7 +14,6 @@ for i in range(7):
         'images', image_name))
     images.append(image)
 
-# game constants
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 LIGHT_BLUE = (64, 224, 208)
@@ -28,14 +25,13 @@ DIRECTIONS_FONT = pygame.font.SysFont('comicsans', 45)
 PHRASE_FONT = pygame.font.SysFont('georgia', 65)
 LETTERS_FONT = pygame.font.SysFont('impact', 50)
 
-DIRECTIONS_X = 275
+DIRECTIONS_X = 250
 HANGMAN_X, HANGMAN_Y = 100, 225
 PHRASE_X, PHRASE_Y = 140, 65
 BUTTONS_GAP_X = 80
 BUTTONS_GAP_Y = 65
 
-# game variables
-directions_y = 100
+directions_y = 70
 button_x = 35
 button_y = 550
 second_row_y = button_y + BUTTONS_GAP_Y
@@ -43,34 +39,57 @@ second_row_y = button_y + BUTTONS_GAP_Y
 phrases = ["MILKING A COW", "EATING PIZZA",
            "AIRPLANE", "LEBRON JAMES",
            "WHITE HOUSE", "DANCE AND SING"]
-current_phrase = random.choice(phrases)
 directions = ["Welcome to HANGMAN! Instructions below",
+              " ",
               "There will be twenty-six letters. One",
               "will be light blue, and the rest will",
               "be black. Use the arrow keys to change",
               "which letter is light blue. Once the",
               "letter you have in mind is light blue,",
               "press 'enter' to check if it's correct.",
-              "Press space to continue"]
-checked_letters = []
+              "Press space to continue",
+              " ",
+              "P.S. Do not worry if there is no light blue",
+              "letter. Just keep pressing the left or right",
+              "arrow key and it will show up."]
 
 letters = []
 A = 65
 for x in range(26):
     letter = chr(A + x)
-    letters.append([letter, False, False])
+    letters.append([letter, False, False, False])
 letters_length = len(letters)
 
+current_phrase = random.choice(phrases)
+phrase_letters = []
+for letter in current_phrase:
+    phrase_letters.append([letter, False])
 
-def set_initial_selected_letter():
-    first_letter = letters[0]
-    return first_letter
+
+def update_current_phrase(phrase_letters):
+    for letter in letters:
+        matching_letter = False
+        for character in phrase_letters:
+            if letter[2]:
+                if character[0] == letter[0]:
+                    character[1] = True
+                    matching_letter = True
+        if not matching_letter:
+            letter[3] = True
+    return phrase_letters
 
 
-def get_mystery_phrase(phrase):
-    phrase_letters = []
-    for character in phrase:
-        phrase_letters.append([character, False])
+def get_hangman_image():
+    hangman_status = 0
+    for letter in letters:
+        if letter[3]:
+            hangman_status += 1
+    hangman_image = images[hangman_status]
+    hangman_image = pygame.transform.scale(hangman_image, (300, 265))
+    return hangman_image
+
+
+def get_phrase_display(phrase_letters):
     phrase = ""
     for letter in phrase_letters:
         if letter[0].isspace():
@@ -87,10 +106,6 @@ def get_button_color(chosen_letter):
     if chosen_letter:
         return LIGHT_BLUE
     return BLACK
-
-
-def set_chosen_letter(letter):
-    letter[1] = True
 
 
 def get_new_letter(change, chosen_letter):
@@ -115,36 +130,34 @@ def find_nearest_letter(chosen_letter):
 
 
 def check_if_spacebar_pressed(event):
-    if event.key == pygame.K_SPACE:
-            return True
+    if event.type == pygame.KEYDOWN:
+        if event.key == pygame.K_SPACE:
+                return True
     return False
 
 
 def check_if_enter_pressed(event, chosen_letter):
-    if event.type == pygame.K_RETURN:
-        chosen_letter[2] = True
-
-
-def check_for_movement(event, chosen_letter):
-    if event.key == pygame.K_RIGHT:
-        chosen_letter[1] = False
-        chosen_letter = get_new_letter(1, chosen_letter)
-    elif event.key == pygame.K_LEFT:
-        chosen_letter[1] = False
-        chosen_letter = get_new_letter(-1, chosen_letter)
-    elif event.key == pygame.K_UP:
-        chosen_letter[1] = False
-        chosen_letter = get_new_letter(-HALF_OF_ALPHABET, chosen_letter)
-    elif event.key == pygame.K_DOWN:
-        chosen_letter[1] = False
-        chosen_letter = get_new_letter(HALF_OF_ALPHABET, chosen_letter)
+    if event.type == pygame.KEYDOWN:
+        if event.key == pygame.K_RETURN:
+            chosen_letter[2] = True
+            chosen_letter = find_nearest_letter(chosen_letter)
     return chosen_letter
 
 
-def get_letter_checked_status(letter):
-    if letter[2]:
-        return True
-    return False
+def check_for_movement(event, chosen_letter):
+    change = 0
+    if event.key == pygame.K_RIGHT:
+        change = 1
+    elif event.key == pygame.K_LEFT:
+        change = -1
+    elif event.key == pygame.K_UP:
+        change = -HALF_OF_ALPHABET
+    elif event.key == pygame.K_DOWN:
+        change = HALF_OF_ALPHABET
+    if change != 0:
+        chosen_letter[1] = False
+    chosen_letter = get_new_letter(change, chosen_letter)
+    return chosen_letter
 
 
 def draw_directions(directions_y):
@@ -171,11 +184,10 @@ def draw_start_window():
     pygame.display.update()
 
 
-def draw_game_window(hangman_image, chosen_letter):
+def draw_game_window(hangman_image, phrase_letters):
     WIN.fill(WHITE)
-    phrase = get_mystery_phrase(current_phrase)
+    phrase = get_phrase_display(phrase_letters)
     phrase = PHRASE_FONT.render(phrase, True, BLACK)
-    set_chosen_letter(chosen_letter)
     draw_button_row(button_x, button_y, 0, HALF_OF_ALPHABET)
     draw_button_row(button_x, second_row_y,
                     HALF_OF_ALPHABET, letters_length)
@@ -192,9 +204,7 @@ def main():
     clock = pygame.time.Clock()
     run = True
     start_menu_status = True
-    chosen_letter = set_initial_selected_letter()
-
-    hangman_status = 0
+    chosen_letter = letters[0]
 
     while run:
         clock.tick(FPS)
@@ -205,20 +215,15 @@ def main():
                 start_menu_status = False
             if event.type == pygame.KEYDOWN:
                 chosen_letter = check_for_movement(event, chosen_letter)
-                check_if_enter_pressed(event, chosen_letter)
+                chosen_letter = check_if_enter_pressed(event, chosen_letter)
 
-
-        checked_letter = get_letter_checked_status(chosen_letter)
-        if checked_letter:
-            chosen_letter = find_nearest_letter(chosen_letter)
+        hangman_image = get_hangman_image()
+        chosen_letter[1] = True
+        phrase = update_current_phrase(phrase_letters)
         if start_menu_status:
             draw_start_window()
             continue
-        # for letter in checked_letters:
-            # hangman_status += 1
-        hangman_image = images[hangman_status]
-        hangman_image = pygame.transform.scale(hangman_image, (300, 265))
-        draw_game_window(hangman_image, chosen_letter)
+        draw_game_window(hangman_image, phrase)
     pygame.quit()
 
 
