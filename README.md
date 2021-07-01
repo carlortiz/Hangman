@@ -2,6 +2,8 @@
 
 The Hangman game. Guess the mystery phrase before the hangman is complete!
 
+![](examples/example.png)
+
 # General
 
 This is a simple single-player game. There will be a mystery phrase, all the letters, and an image of the hangman. As the player 
