@@ -2,7 +2,7 @@
 
 The Hangman game. Guess the mystery phrase before the hangman is complete!
 
-<img src= "examples/example.png" width = "400" height = "400">
+<img src= "examples/example.png" width = "600" height = "400">
 
 # General
 
