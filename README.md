@@ -1,8 +1,10 @@
 # Hangman
 
-The Hangman game. Guess the mystery phrase before the hangman is complete!
+A game app made with Pygame about Hangman, a classic game.
 
+<p align="center">
 <img src= "examples/example.png" width = "600" height = "400">
+</p>
 
 # General
 
@@ -11,6 +13,5 @@ enters in letters, the mystery phrase slowly gets revealed, or the hangman gets 
 
 # Technology/Tools
 
-- Made using Pygame
-- Made on PyCharm
-- Python version 3.9
+- Pygame
+- Python 3.9
