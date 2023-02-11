@@ -3,7 +3,7 @@
 A game app made with Pygame about Hangman, a classic game.
 
 <p align="center">
-<img src= "examples/example.png" width = "600" height = "400">
+<img src= "examples/example.png" width = "550" height = "350">
 </p>
 
 # General
