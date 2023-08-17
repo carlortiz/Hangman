@@ -1,6 +1,6 @@
 # Hangman
 
-A game app made with Pygame about Hangman, a classic game.
+A pygame program that is a clone of Hangman, a classic game.
 
 <p align="center">
 <img src= "examples/example.png" width = "550" height = "350">
